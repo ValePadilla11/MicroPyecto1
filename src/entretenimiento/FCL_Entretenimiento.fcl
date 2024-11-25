@@ -1,0 +1,108 @@
+FUNCTION_BLOCK Entretenimiento
+
+// Definición de las variables de entrada
+VAR_INPUT				
+    Disponibilidad_de_Tiempo : REAL; RANGE := (0 .. 120);
+    Duracion_del_Contenido : REAL; RANGE := (0 .. 150);
+    Epoca_de_Emision : REAL; RANGE := (0 .. 10);
+END_VAR
+
+// Definición de las variables de salida
+VAR_OUTPUT				
+    Nivel_de_Compatibilidad_de_Tiempo : REAL; RANGE := (0 .. 100);
+    Posibilidad_de_Consumo_Completo : REAL; RANGE := (0 .. 100);
+END_VAR
+
+// Fuzzificación de la variable de entrada 'Disponibilidad_de_Tiempo'
+FUZZIFY Disponibilidad_de_Tiempo
+    TERM Muy_Poca := trape 0 0 10 25; 
+    TERM Poca := trian 15 30 50;
+    TERM Regular := trian 35 60 85;
+    TERM Mucho := trian 70 90 115; 
+    TERM Demasiado := trape 100 110 120 120;
+END_FUZZIFY
+
+// Fuzzificación de la variable de entrada 'Duracion_del_Contenido'
+FUZZIFY Duracion_del_Contenido
+    TERM Muy_Corto := trape 0 0 10 25; 
+    TERM Corto := trian 15 35 55;
+    TERM Medio := trian 40 70 95;
+    TERM Largo := trian 80 110 135; 
+    TERM Muy_Largo := trape 120 140 150 150;
+END_FUZZIFY
+
+// Fuzzificación de la variable de entrada 'Epoca_de_Emision'
+FUZZIFY Epoca_de_Emision
+    TERM Estreno := trape 0 0 1.0 2.5; 
+    TERM Reciente := trian 1.5 4 6;
+    TERM Conocido := trian 5 7 8.5;
+    TERM Clasico := trape 7.5 9 10 10;
+END_FUZZIFY
+
+// Defuzzificación de la variable de salida 'Nivel_de_Compatibilidad_de_Tiempo'
+DEFUZZIFY Nivel_de_Compatibilidad_de_Tiempo
+    TERM Muy_Baja := trape 0 0 10 20;
+    TERM Baja := gauss 7 30;
+    TERM Media := gauss 5.5 50;
+    TERM Alta := gauss 7 70;
+    TERM Muy_Alta := trape 80 90 100 100;
+
+    METHOD : COG;
+    DEFAULT := 0;
+END_DEFUZZIFY
+
+// Defuzzificación de la variable de salida 'Posibilidad_de_Consumo_Completo'
+DEFUZZIFY Posibilidad_de_Consumo_Completo
+    TERM Muy_Baja := trape 0 0 10 20;
+    TERM Baja := gauss 7 30;
+    TERM Media := gauss 5.5 50;
+    TERM Alta := gauss 7 70;
+    TERM Muy_Alta := trape 80 90 100 100;
+
+    METHOD : COG;
+    DEFAULT := 0;
+END_DEFUZZIFY
+
+// Reglas de inferencia
+RULEBLOCK No1
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+
+    RULE 3 : IF Disponibilidad_de_Tiempo IS Muy_Poca AND Duracion_del_Contenido IS Muy_Corto THEN Nivel_de_Compatibilidad_de_Tiempo IS Alta;
+    RULE 4 : IF Disponibilidad_de_Tiempo IS Muy_Poca AND Duracion_del_Contenido IS Muy_Corto THEN Posibilidad_de_Consumo_Completo IS Media;
+    RULE 5 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Medio THEN Nivel_de_Compatibilidad_de_Tiempo IS Media;
+    RULE 6 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Medio THEN Posibilidad_de_Consumo_Completo IS Media;
+    RULE 7 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Largo THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Baja;
+    RULE 8 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Largo THEN Posibilidad_de_Consumo_Completo IS Muy_Baja;
+    RULE 9 : IF Disponibilidad_de_Tiempo IS Poca AND Epoca_de_Emision IS Estreno THEN Nivel_de_Compatibilidad_de_Tiempo IS Media;
+    RULE 10 : IF Disponibilidad_de_Tiempo IS Poca AND Epoca_de_Emision IS Estreno THEN Posibilidad_de_Consumo_Completo IS Alta;
+    RULE 11 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Medio THEN Nivel_de_Compatibilidad_de_Tiempo IS Alta;
+    RULE 12 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Medio THEN Posibilidad_de_Consumo_Completo IS Alta;
+
+    RULE 15 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Largo THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Alta;
+    RULE 16 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Largo THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 17 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Medio THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Alta;
+    RULE 18 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Medio THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 19 : IF Disponibilidad_de_Tiempo IS Mucho AND Epoca_de_Emision IS Clasico THEN Nivel_de_Compatibilidad_de_Tiempo IS Alta;
+    RULE 20 : IF Disponibilidad_de_Tiempo IS Mucho AND Epoca_de_Emision IS Clasico THEN Posibilidad_de_Consumo_Completo IS Media;
+    RULE 21 : IF Disponibilidad_de_Tiempo IS Demasiado THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Alta;
+    RULE 22 : IF Disponibilidad_de_Tiempo IS Demasiado THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 23 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Muy_Largo AND Epoca_de_Emision IS Estreno THEN Nivel_de_Compatibilidad_de_Tiempo IS Alta;
+    RULE 24 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Muy_Largo AND Epoca_de_Emision IS Estreno THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 25 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Medio AND Epoca_de_Emision IS Estreno THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 26 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Medio AND Epoca_de_Emision IS Estreno THEN Nivel_de_Compatibilidad_de_Tiempo IS Media;
+    RULE 27 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Muy_Largo AND Epoca_de_Emision IS Estreno THEN Posibilidad_de_Consumo_Completo IS Muy_Alta;
+    RULE 28 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Muy_Largo THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Baja;
+    RULE 29 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Muy_Largo THEN Posibilidad_de_Consumo_Completo IS Muy_Baja;
+    RULE 30 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Muy_Largo THEN Nivel_de_Compatibilidad_de_Tiempo IS Baja;
+    RULE 31 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Muy_Largo THEN Posibilidad_de_Consumo_Completo IS Media;
+    RULE 32 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Corto AND Epoca_de_Emision IS Reciente THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Alta;
+    RULE 33 : IF Disponibilidad_de_Tiempo IS Regular AND Duracion_del_Contenido IS Corto AND Epoca_de_Emision IS Reciente THEN Posibilidad_de_Consumo_Completo IS Alta;
+    RULE 34 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Largo THEN Nivel_de_Compatibilidad_de_Tiempo IS Muy_Baja;
+    RULE 35 : IF Disponibilidad_de_Tiempo IS Poca AND Duracion_del_Contenido IS Largo THEN Posibilidad_de_Consumo_Completo IS Muy_Baja;
+    RULE 36 : IF Disponibilidad_de_Tiempo IS Mucho AND Duracion_del_Contenido IS Muy_Largo AND Epoca_de_Emision IS Estreno THEN Nivel_de_Compatibilidad_de_Tiempo IS Alta;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
